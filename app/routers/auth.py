@@ -1,0 +1,71 @@
+"""
+Routes d'authentification.
+L'inscription crée le compte Supabase Auth + le profil (avec rôle et,
+si fourni, le lien vers le parrain via referral_code).
+"""
+from fastapi import APIRouter, HTTPException, Depends
+from app.database import get_supabase
+from app.schemas import SignupRequest, LoginRequest, TokenResponse, ProfileOut
+from app.deps import get_current_user
+import secrets
+import string
+
+router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+def _generate_referral_code() -> str:
+    return "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+
+
+@router.post("/signup", response_model=TokenResponse)
+async def signup(payload: SignupRequest, supabase=Depends(get_supabase)):
+    auth_res = supabase.auth.sign_up(
+        {"email": payload.email, "password": payload.password}
+    )
+    if auth_res.user is None:
+        raise HTTPException(status_code=400, detail="Échec de la création du compte")
+
+    user_id = auth_res.user.id
+
+    referred_by = None
+    if payload.referral_code:
+        referrer = (
+            supabase.table("profiles")
+            .select("id")
+            .eq("referral_code", payload.referral_code)
+            .eq("role", "affiliate")
+            .maybe_single()
+            .execute()
+        )
+        if referrer.data:
+            referred_by = referrer.data["id"]
+
+    profile_data = {
+        "id": user_id,
+        "role": payload.role.value,
+        "full_name": payload.full_name,
+        "phone": payload.phone,
+        "email": payload.email,
+        "referred_by": referred_by,
+    }
+    if payload.role.value == "affiliate":
+        profile_data["referral_code"] = _generate_referral_code()
+
+    supabase.table("profiles").insert(profile_data).execute()
+
+    return TokenResponse(access_token=auth_res.session.access_token)
+
+
+@router.post("/login", response_model=TokenResponse)
+async def login(payload: LoginRequest, supabase=Depends(get_supabase)):
+    auth_res = supabase.auth.sign_in_with_password(
+        {"email": payload.email, "password": payload.password}
+    )
+    if auth_res.session is None:
+        raise HTTPException(status_code=401, detail="Identifiants incorrects")
+    return TokenResponse(access_token=auth_res.session.access_token)
+
+
+@router.get("/me", response_model=ProfileOut)
+async def get_me(user: dict = Depends(get_current_user)):
+    return user
