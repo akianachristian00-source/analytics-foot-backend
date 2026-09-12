@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PronoLab — Analyses foot par IA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pitch: #0D1912;
+    --pitch-line: #17281D;
+    --grass: #3FB861;
+    --grass-bright: #5FE585;
+    --gold: #E8B54D;
+    --paper: #F3F1E8;
+    --paper-dim: #A9B3AA;
+    --lost: #D9634F;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--pitch);
+    color: var(--paper);
+    font-family: 'Barlow', sans-serif;
+    margin: 0;
+  }
+  h1, h2, h3, .display {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+  }
+  .field-lines {
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(63,184,97,0.06) 79px, rgba(63,184,97,0.06) 80px);
+  }
+  .card {
+    background: var(--pitch-line);
+    border: 1px solid rgba(63,184,97,0.15);
+  }
+  .btn-primary {
+    background: var(--grass);
+    color: #06110A;
+    font-weight: 700;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .btn-primary:hover { background: var(--grass-bright); transform: translateY(-1px); }
+  .btn-gold {
+    background: var(--gold);
+    color: #241a05;
+    font-weight: 700;
+  }
+  .confidence-bar-track { background: rgba(255,255,255,0.08); }
+  .confidence-bar-fill { background: linear-gradient(90deg, var(--grass), var(--grass-bright)); }
+  .locked-blur { filter: blur(3px); user-select: none; }
+  ::selection { background: var(--grass); color: #06110A; }
+</style>
+</head>
+<body class="field-lines">
+
+  <!-- NAV -->
+  <header class="flex items-center justify-between px-6 md:px-12 py-5 border-b" style="border-color: rgba(63,184,97,0.15);">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full" style="background: var(--grass);"></div>
+      <span class="display text-2xl">PronoLab</span>
+    </div>
+    <a href="#pass" class="btn-primary px-5 py-2 rounded text-sm">Voir les Pass VIP</a>
+  </header>
+
+  <!-- HERO -->
+  <section class="px-6 md:px-12 pt-16 pb-20 max-w-5xl mx-auto text-center">
+    <p class="uppercase text-sm tracking-wide" style="color: var(--gold);">Analyses IA — championnats européens</p>
+    <h1 class="display text-5xl md:text-7xl mt-4 leading-none">
+      On ne devine pas.<br>On analyse.
+    </h1>
+    <p class="mt-6 text-lg max-w-2xl mx-auto" style="color: var(--paper-dim);">
+      Chaque pronostic vient d'une lecture des statistiques réelles : forme récente,
+      confrontations directes, données xG. Rien n'est caché — tu vois nos résultats
+      passés avant de payer un centime.
+    </p>
+    <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+      <a href="#pass" class="btn-primary px-8 py-3 rounded text-lg w-full sm:w-auto">Débloquer le Pass VIP</a>
+      <a href="#transparence" class="text-sm underline" style="color: var(--paper-dim);">Voir nos résultats vérifiés</a>
+    </div>
+  </section>
+
+  <!-- TRANSPARENCE -->
+  <section id="transparence" class="px-6 md:px-12 py-16 border-t" style="border-color: rgba(63,184,97,0.15);">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="display text-3xl md:text-4xl mb-2">Derniers résultats</h2>
+      <p class="mb-8" style="color: var(--paper-dim);">Aucun tri, aucune suppression — tout est affiché, gagné comme perdu.</p>
+
+      <div class="grid gap-3">
+        <!-- Résultat gagné -->
+        <div class="card rounded-lg p-4 flex items-center justify-between">
+          <div>
+            <p class="font-semibold">Marseille — Lyon</p>
+            <p class="text-sm" style="color: var(--paper-dim);">Victoire ou nul Marseille · cote 1.65</p>
+          </div>
+          <span class="px-3 py-1 rounded text-sm font-bold" style="background: rgba(63,184,97,0.15); color: var(--grass-bright);">✅ Gagné</span>
+        </div>
+        <!-- Résultat perdu -->
+        <div class="card rounded-lg p-4 flex items-center justify-between">
+          <div>
+            <p class="font-semibold">Séville — Betis</p>
+            <p class="text-sm" style="color: var(--paper-dim);">Plus de 2.5 buts · cote 1.80</p>
+          </div>
+          <span class="px-3 py-1 rounded text-sm font-bold" style="background: rgba(217,99,79,0.15); color: var(--lost);">❌ Perdu</span>
+        </div>
+        <!-- Résultat gagné -->
+        <div class="card rounded-lg p-4 flex items-center justify-between">
+          <div>
+            <p class="font-semibold">Porto — Benfica</p>
+            <p class="text-sm" style="color: var(--paper-dim);">Combiné Sécurité (3 matchs) · cote 2.90</p>
+          </div>
+          <span class="px-3 py-1 rounded text-sm font-bold" style="background: rgba(63,184,97,0.15); color: var(--grass-bright);">✅ Gagné</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APERÇU CARTE PRONOSTIC (Indicateur confiance IA) -->
+  <section class="px-6 md:px-12 py-16 border-t" style="border-color: rgba(63,184,97,0.15);">
+    <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h2 class="display text-3xl md:text-4xl mb-4">Chaque carte explique son analyse</h2>
+        <p style="color: var(--paper-dim);">
+          Pas de boîte noire. Chaque pronostic affiche un indice de confiance et
+          les deux facteurs qui l'expliquent, en langage clair.
+        </p>
+      </div>
+
+      <div class="card rounded-xl p-6">
+        <div class="flex justify-between items-start mb-3">
+          <div>
+            <p class="text-sm" style="color: var(--paper-dim);">Ligue 1 · Aujourd'hui 20h</p>
+            <p class="font-semibold text-lg">Lille — Rennes</p>
+          </div>
+          <span class="text-xs px-2 py-1 rounded" style="background: rgba(232,181,77,0.15); color: var(--gold);">🔒 VIP</span>
+        </div>
+        <div class="mb-3">
+          <div class="flex justify-between text-sm mb-1">
+            <span style="color: var(--paper-dim);">Confiance IA</span>
+            <span class="font-semibold" style="color: var(--grass-bright);">86%</span>
+          </div>
+          <div class="confidence-bar-track h-2 rounded-full overflow-hidden">
+            <div class="confidence-bar-fill h-full rounded-full" style="width: 86%;"></div>
+          </div>
+        </div>
+        <ul class="text-sm space-y-1 locked-blur" style="color: var(--paper-dim);">
+          <li>• Forme à domicile : 5 victoires d'affilée</li>
+          <li>• Buteur clé de retour de blessure</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- PASS VIP -->
+  <section id="pass" class="px-6 md:px-12 py-16 border-t" style="border-color: rgba(63,184,97,0.15);">
+    <div class="max-w-5xl mx-auto text-center mb-12">
+      <h2 class="display text-3xl md:text-4xl mb-2">Choisis ton Pass</h2>
+      <p style="color: var(--paper-dim);">Paiement sécurisé par Mobile Money via SenePay.</p>
+    </div>
+
+    <div class="max-w-5xl mx-auto grid md:grid-cols-3 gap-6">
+
+      <!-- Free -->
+      <div class="card rounded-xl p-6 flex flex-col">
+        <p class="uppercase text-sm" style="color: var(--paper-dim);">Free</p>
+        <p class="display text-4xl my-2">0 FCFA</p>
+        <ul class="text-sm space-y-2 my-4 flex-1" style="color: var(--paper-dim);">
+          <li>1 à 2 pronostics gratuits / jour</li>
+          <li class="opacity-50">🔒 Combinés verrouillés</li>
+          <li class="opacity-50">🔒 Coups sûrs verrouillés</li>
+        </ul>
+        <button class="px-5 py-2 rounded border w-full" style="border-color: rgba(255,255,255,0.2); color: var(--paper);">Commencer gratuitement</button>
+      </div>
+
+      <!-- Journée -->
+      <div class="card rounded-xl p-6 flex flex-col">
+        <p class="uppercase text-sm" style="color: var(--paper-dim);">Pass Journée</p>
+        <p class="display text-4xl my-2">1000 FCFA<span class="text-base font-normal" style="color: var(--paper-dim);"> /24h</span></p>
+        <ul class="text-sm space-y-2 my-4 flex-1" style="color: var(--paper-dim);">
+          <li>Tous les pronostics VIP du jour</li>
+          <li>Combiné Sécurité débloqué</li>
+        </ul>
+        <button class="btn-primary px-5 py-2 rounded w-full">Choisir ce Pass</button>
+      </div>
+
+      <!-- Mensuel (mis en avant) -->
+      <div class="rounded-xl p-6 flex flex-col relative" style="background: linear-gradient(160deg, #1A2E1F, var(--pitch-line)); border: 1px solid var(--gold);">
+        <span class="absolute -top-3 left-6 text-xs px-3 py-1 rounded-full btn-gold">Le plus avantageux</span>
+        <p class="uppercase text-sm" style="color: var(--gold);">Pass Mensuel</p>
+        <p class="display text-4xl my-2">5000 FCFA<span class="text-base font-normal" style="color: var(--paper-dim);"> /30j</span></p>
+        <ul class="text-sm space-y-2 my-4 flex-1" style="color: var(--paper-dim);">
+          <li>Accès illimité à tous les pronostics</li>
+          <li>Les 3 combinés débloqués (Jackpot inclus)</li>
+          <li>Historique complet des statistiques</li>
+        </ul>
+        <button class="btn-gold px-5 py-2 rounded w-full">Choisir ce Pass</button>
+      </div>
+
+    </div>
+
+    <p class="text-center text-sm mt-6" style="color: var(--paper-dim);">
+      Aussi disponible : Pass Semaine (7 jours) — 2500 FCFA
+    </p>
+  </section>
+
+  <!-- PROGRAMME AFFILIATION (bas de page) -->
+  <section class="px-6 md:px-12 py-16 border-t" style="border-color: rgba(63,184,97,0.15); background: var(--pitch-line);">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 class="display text-3xl md:text-4xl mb-3">Gagne en partageant PronoLab</h2>
+      <p class="mb-6" style="color: var(--paper-dim);">
+        Chaque personne que tu invites et qui prend un Pass te rapporte 30% de commission,
+        en cash, sans plafond. Retrait chaque dimanche dès 5000 FCFA cumulés.
+      </p>
+      <a href="#" class="btn-primary inline-block px-8 py-3 rounded text-lg">Devenir affilié</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="px-6 md:px-12 py-8 text-center text-sm border-t" style="border-color: rgba(63,184,97,0.15); color: var(--paper-dim);">
+    PronoLab — Analyses statistiques à but informatif. Aucun pari n'est pris sur cette plateforme.
+  </footer>
+
+</body>
+</html>
