@@ -53,6 +53,15 @@ async def signup(payload: SignupRequest, supabase=Depends(get_supabase)):
 
     supabase.table("profiles").insert(profile_data).execute()
 
+    # Si la confirmation par e-mail est activée sur Supabase, sign_up()
+    # ne renvoie pas de session tant que l'utilisateur n'a pas confirmé
+    # son adresse. On gère ce cas proprement au lieu de planter.
+    if auth_res.session is None:
+        raise HTTPException(
+            status_code=202,
+            detail="Compte créé avec succès. Veuillez confirmer votre e-mail avant de vous connecter.",
+        )
+
     return TokenResponse(access_token=auth_res.session.access_token)
 
 
