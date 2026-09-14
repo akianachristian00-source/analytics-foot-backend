@@ -7,6 +7,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.database import get_supabase
 from app.schemas import SignupRequest, LoginRequest, TokenResponse, ProfileOut
 from app.deps import get_current_user
+from pydantic import BaseModel
 import secrets
 import string
 
@@ -15,6 +16,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 def _generate_referral_code() -> str:
     return "".join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+
+
+class VerifyOtpRequest(BaseModel):
+    email: str
+    token: str
 
 
 @router.post("/signup", response_model=TokenResponse)
@@ -62,6 +68,16 @@ async def signup(payload: SignupRequest, supabase=Depends(get_supabase)):
             detail="Compte créé avec succès. Veuillez confirmer votre e-mail avant de vous connecter.",
         )
 
+    return TokenResponse(access_token=auth_res.session.access_token)
+
+
+@router.post("/verify-otp", response_model=TokenResponse)
+async def verify_otp(payload: VerifyOtpRequest, supabase=Depends(get_supabase)):
+    auth_res = supabase.auth.verify_otp(
+        {"email": payload.email, "token": payload.token, "type": "signup"}
+    )
+    if auth_res.session is None:
+        raise HTTPException(status_code=400, detail="Code invalide ou expiré")
     return TokenResponse(access_token=auth_res.session.access_token)
 
 
