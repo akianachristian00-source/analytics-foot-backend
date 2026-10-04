@@ -64,6 +64,6 @@ async def get_my_active_subscription(
         .maybe_single()
         .execute()
     )
-    if not sub.data:
+    if sub is None or not sub.data:
         raise HTTPException(status_code=404, detail="Aucun abonnement actif")
     return sub.data
