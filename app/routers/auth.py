@@ -42,9 +42,9 @@ async def signup(payload: SignupRequest, supabase=Depends(get_supabase)):
             .eq("role", "affiliate")
             .maybe_single()
             .execute()
-        )if referrer and referrer.data:
+        )
+        if referrer and referrer.data:
             referred_by = referrer.data["id"]
-
     profile_data = {
         "id": user_id,
         "role": payload.role.value,
