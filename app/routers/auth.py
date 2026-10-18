@@ -25,6 +25,10 @@ class VerifyOtpRequest(BaseModel):
 
 @router.post("/signup", response_model=TokenResponse)
 async def signup(payload: SignupRequest, supabase=Depends(get_supabase)):
+    # Sécurité : le rôle admin ne peut jamais être choisi à l'inscription.
+    if payload.role.value not in ("user", "affiliate"):
+        raise HTTPException(status_code=403, detail="Rôle non autorisé à l'inscription")
+
     auth_res = supabase.auth.sign_up(
         {"email": payload.email, "password": payload.password}
     )

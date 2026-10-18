@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     price_weekly: int = 2500
     price_monthly: int = 5000
 
+    # CORS : domaines autorisés, séparés par des virgules (ex: https://monsite.com)
+    allowed_origins: str = "*"
+
     # Programme d'affiliation
     commission_rate: float = 0.30  # 30% pour l'affilié, 70% conservés
     min_withdrawal_fcfa: int = 5000

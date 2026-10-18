@@ -6,7 +6,7 @@
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env  # puis remplir les valeurs (clés Supabase, SenePay, SMTP)
+cp env.example .env  # puis remplir les valeurs (clés Supabase, SenePay, SMTP)
 ```
 
 ## Lancer en local

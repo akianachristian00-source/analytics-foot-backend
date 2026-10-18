@@ -11,6 +11,7 @@ leur documentation exacte (https://api.sene-pay.com/docs.html) — la
 structure générale (créer un payin, recevoir un webhook signé) est fiable,
 mais les noms de champs doivent être vérifiés avant mise en prod.
 """
+from datetime import datetime, timezone
 import hmac
 import hashlib
 import httpx
@@ -111,10 +112,14 @@ async def senepay_webhook(request: Request, supabase=Depends(get_supabase)):
     if not payment.data:
         raise HTTPException(status_code=404, detail="Paiement introuvable")
 
+    # Idempotence : un webhook rejoué ne doit pas retraiter un paiement déjà finalisé.
+    if payment.data["status"] != "pending":
+        return {"received": True, "already_processed": True}
+
     new_status = "success" if status_ == "success" else "failed"
 
     supabase.table("payments").update(
-        {"status": new_status, "paid_at": "now()"}
-    ).eq("id", payment.data["id"]).execute()
+        {"status": new_status, "paid_at": datetime.now(timezone.utc).isoformat()}
+    ).eq("id", payment.data["id"]).eq("status", "pending").execute()
 
     return {"received": True}
